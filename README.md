@@ -36,7 +36,7 @@ AI & APIs	OpenRouter (AI Chatbot), NewsAPI (Market News)
 Database	SQLite / PostgreSQL for user portfolios & transactions
 ⚙️ Installation & Setup
 1️⃣ Clone the repository
-git clone https://github.com/your-username/stockwise.git
+git clone https://github.com/your-username/StockWisee.git
 cd stockwise
 
 2️⃣ Install dependencies
