@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}StockWise - Smart Indian Market Comparison{% endblock %}
+
+{% block content %}
+<div class="background-container">
+  <img src="{{ url_for('static', filename='images/image2.png') }}" class="background-image" alt="Market Background">
+</div>
+
+<div class="container">
+  <div class="row justify-content-center align-items-center vh-100">
+    <div class="col-lg-8 text-center text-white animate__animated animate__fadeIn">
+      <h1 class="display-3 fw-bold mb-4">StockWise</h1>
+      <p class="lead mb-5">Smart Comparison Platform for BSE & NSE</p>
+      
+      <div class="glass-card p-5 mb-5">
+        <h2 class="mb-4">Why StockWise?</h2>
+        <div class="row text-start">
+          <div class="col-md-6 mb-4">
+            <div class="d-flex">
+              <div class="me-3">
+                <i class="fas fa-chart-line fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h4>Cross-Market Analysis</h4>
+                <p>Compare real-time prices between BSE and NSE to find the best investment opportunities</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-4">
+            <div class="d-flex">
+              <div class="me-3">
+                <i class="fas fa-robot fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h4>AI-Powered Insights</h4>
+                <p>Get intelligent recommendations on which market offers better value for each stock</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-4">
+            <div class="d-flex">
+              <div class="me-3">
+                <i class="fas fa-project-diagram fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h4>Interactive Visualizations</h4>
+                <p>Understand market trends through intuitive charts and historical data</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-4">
+            <div class="d-flex">
+              <div class="me-3">
+                <i class="fas fa-bolt fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h4>Time-Saving Tools</h4>
+                <p>Centralized platform eliminates the need for multiple data sources</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-5 pt-5 text-white-50">
+        <small>Created by <strong>Saurish and Arka</strong> | Stock Market Analysis Tool</small>
+      </div>
+      
+      <div class="d-flex justify-content-center gap-4">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-glass btn-lg px-4 py-3">
+          <i class="fas fa-sign-in-alt me-2"></i> Login
+        </a>
+        <a href="{{ url_for('auth.sign_up') }}" class="btn btn-glass btn-lg px-4 py-3">
+          <i class="fas fa-user-plus me-2"></i> Sign Up
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.23);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    color: white;
+  }
+  
+  .btn-glass {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-glass:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+  }
+</style>
+{% endblock %}

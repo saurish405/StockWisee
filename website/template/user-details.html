@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .profile-container {
+    padding: 2rem 0;
+  }
+  
+  .profile-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    color: white;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    width: 100%;
+    min-height: 400px;
+  }
+
+  .profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(31, 38, 135, 0.45);
+  }
+
+  .profile-card .card-header {
+    background: linear-gradient(135deg, rgba(78, 115, 223, 0.6) 0%, rgba(28, 83, 185, 0.7) 100%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 1.5rem;
+  }
+
+  .profile-card .card-body {
+    padding: 2rem;
+  }
+
+  .info-card {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px !important;
+    color: white;
+    transition: all 0.3s ease;
+    height: 100%;
+    padding: 1.5rem;
+  }
+
+  .info-card:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    transform: translateY(-3px);
+  }
+
+  .info-card h5 {
+    color: white !important;
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .info-card hr {
+    border-color: rgba(255, 255, 255, 0.3);
+    margin: 1rem 0;
+  }
+
+  .info-card p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 0.5rem 0;
+  }
+
+  .btn-outline-primary {
+    border-color: rgba(255, 255, 255, 0.7);
+    color: white;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    margin: 0.25rem 0;
+  }
+
+  .btn-outline-primary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    border-color: white;
+  }
+
+  .btn-outline-danger {
+    border-color: rgba(220, 53, 69, 0.7);
+    color: rgba(255, 255, 255, 0.9);
+    background: transparent;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    margin: 0.25rem 0;
+  }
+
+  .btn-outline-danger:hover {
+    background: rgba(220, 53, 69, 0.3);
+    color: white;
+    border-color: rgba(220, 53, 69, 0.9);
+  }
+
+  .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Improved spacing */
+  .card-content {
+    padding: 0.5rem 0;
+  }
+  
+  .action-buttons {
+    margin-top: 1.5rem;
+  }
+  
+  .icon-spacing {
+    margin-right: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container profile-container">
+  <div class="row justify-content-center animate__animated animate__fadeIn">
+    <div class="col-lg-10 col-xl-8">
+      <div class="profile-card">
+        <div class="card-header text-white">
+          <h3 class="mb-0"><i class="fas fa-user-circle icon-spacing"></i>User Profile</h3>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="info-card">
+                <h5><i class="fas fa-info-circle icon-spacing"></i>Account Information</h5>
+                <hr>
+                <div class="card-content">
+                  <p><strong><i class="fas fa-user icon-spacing"></i>Name:</strong> {{ current_user.first_name }}</p>
+                  <p><strong><i class="fas fa-envelope icon-spacing"></i>Email:</strong> {{ current_user.email }}</p>
+                  <p><strong><i class="fas fa-calendar-alt icon-spacing"></i>Member Since:</strong> 
+                    {{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else 'N/A' }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-card">
+                <h5><i class="fas fa-cog icon-spacing"></i>Account Actions</h5>
+                <hr>
+                <div class="card-content">
+                  <div class="d-grid gap-2 action-buttons">
+                    <a href="#" class="btn btn-outline-primary">
+                      <i class="fas fa-edit icon-spacing"></i>Edit Profile
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">
+                      <i class="fas fa-sign-out-alt icon-spacing"></i>Logout
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,957 @@
+{% extends "base.html" %}
+
+{% block title %}Market Comparison{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .search-container {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+
+  .chart-container {
+    background: rgba(255, 255, 255, 0.6) !important; /* More opaque than before */
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    height: 400px;
+}
+  
+  #stockSearch {
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px 0 0 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  #searchBtn {
+    padding: 12px 20px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 0 8px 8px 0;
+    color: white;
+  }
+  
+  .stock-info {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    color: white;
+  }
+  
+  .exchange-prices {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .price-card {
+    flex: 1;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .price {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .change {
+    font-size: 1rem;
+  }
+  
+  .price-difference {
+    text-align: center;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .recommendation {
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 10px;
+    background: rgb(255, 255, 255);
+  }
+  
+  .chart-container {
+    background: rgb(255, 255, 255);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    height: 400px;
+  }
+  
+  .analysis-container {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    .exchange-prices {
+      flex-direction: column;
+    }
+    
+    .chart-container {
+      height: 300px;
+    }
+  }
+
+  .search-container input#stockSearch {
+  color: white !important;
+}
+
+.search-container input#stockSearch::placeholder {
+  color: rgb(255, 255, 255) !important;
+}
+
+.chart-container canvas {
+    color: white !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="text-center mb-5 animate__animated animate__fadeIn">
+    <h1 class="text-white">India Stock Price Comparison</h1>
+    <p class="text-white-50">Compare stock prices between NSE and BSE exchanges</p>
+  </div>
+
+  <div class="search-container animate__animated animate__fadeIn">
+    <div class="input-group">
+      <input type="text" id="stockSearch" class="form-control" placeholder="Enter stock symbol (e.g., RELIANCE, TCS, INFY)">
+      <button id="searchBtn" class="btn">Search</button>
+    </div>
+  </div>
+
+  <div class="loading text-center py-5" id="loading" style="display: none;">
+    <div class="spinner-border text-primary mb-3" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-white">Loading data...</p>
+  </div>
+
+  <div class="content" id="content" style="display: none;">
+    <div class="stock-info animate__animated animate__fadeIn" id="stockInfo">
+      <h2 class="text-center mb-4" id="stockName">Stock Name</h2>
+      <div class="exchange-prices">
+        <div class="price-card">
+          <h3>NSE</h3>
+          <p class="price" id="nsePrice">₹0.00</p>
+          <p class="change" id="nseChange">0.00 (0.00%)</p>
+        </div>
+        <div class="price-card">
+          <h3>BSE</h3>
+          <p class="price" id="bsePrice">₹0.00</p>
+          <p class="change" id="bseChange">0.00 (0.00%)</p>
+        </div>
+      </div>
+      <div class="price-difference">
+        <h3>Price Difference</h3>
+        <p id="priceDiff">₹0.00 (0.00%)</p>
+        <p id="recommendation" class="recommendation">No recommendation available</p>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-6 animate__animated animate__fadeInLeft">
+        <div class="chart-container">
+          <h3 class="text-center mb-3">Price Comparison</h3>
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6 animate__animated animate__fadeInRight">
+        <div class="chart-container">
+          <h3 class="text-center mb-3">Price Difference</h3>
+          <canvas id="diffChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis-container animate__animated animate__fadeInUp">
+      <h3 class="text-center mb-3">AI Analysis Report</h3>
+      <div id="analysisLoading" class="text-center py-3" style="display: none;">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-white">Generating analysis...</p>
+      </div>
+      <div id="analysisReport" class="analysis-report"></div>
+    </div>
+  </div>
+
+  <div class="error text-center py-5" id="error" style="display: none;">
+    <p class="text-white">Error loading stock data. Please try another stock symbol.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // DOM elements
+    const searchBtn = document.getElementById('searchBtn');
+    const stockSearch = document.getElementById('stockSearch');
+    const loading = document.getElementById('loading');
+    const content = document.getElementById('content');
+    const error = document.getElementById('error');
+    const stockName = document.getElementById('stockName');
+    const nsePrice = document.getElementById('nsePrice');
+    const bsePrice = document.getElementById('bsePrice');
+    const nseChange = document.getElementById('nseChange');
+    const bseChange = document.getElementById('bseChange');
+    const priceDiff = document.getElementById('priceDiff');
+    const recommendation = document.getElementById('recommendation');
+    const analysisLoading = document.getElementById('analysisLoading');
+    const analysisReport = document.getElementById('analysisReport');
+    
+    // Chart instances
+    let priceChart = null;
+    let diffChart = null;
+    
+    // Sample stock data (in a real app, this would come from an API)
+    const stocksData = {
+        'RELIANCE': {
+            name: 'Reliance Industries Ltd.',
+            data: generateStockData(2200, 2190, 30)
+        },
+        'TCS': {
+            name: 'Tata Consultancy Services Ltd.',
+            data: generateStockData(3500, 3490, 30)
+        },
+        'INFY': {
+            name: 'Infosys Ltd.',
+            data: generateStockData(1500, 1495, 30)
+        },
+        'HDFCBANK': {
+            name: 'HDFC Bank Ltd.',
+            data: generateStockData(1600, 1595, 30)
+        },
+        'ICICIBANK': {
+            name: 'ICICI Bank Ltd.',
+            data: generateStockData(950, 945, 30)
+        },
+        'HINDUNILVR': {
+            name: 'Hindustan Unilever Ltd.',
+            data: generateStockData(2400, 2390, 30)
+        },
+        'SBIN': {
+            name: 'State Bank of India',
+            data: generateStockData(550, 548, 30)
+        },
+        'BHARTIARTL': {
+            name: 'Bharti Airtel Ltd.',
+            data: generateStockData(850, 845, 30)
+        },
+        'ITC': {
+            name: 'ITC Ltd.',
+            data: generateStockData(420, 418, 30)
+        },
+        'KOTAKBANK': {
+            name: 'Kotak Mahindra Bank Ltd.',
+            data: generateStockData(1800, 1795, 30)
+        },
+        'ACC': {
+            name: 'ACC Ltd.',
+            data: generateStockData(2100, 2095, 30)
+        },
+        'NIFTY50': {
+        name: 'NIFTY 50 Index',
+        data: generateStockData(22000, 21950, 30) // Higher base price for indices
+    },
+    'SENSEX': {
+        name: 'S&P BSE SENSEX',
+        data: generateStockData(73000, 72900, 30) // Higher base price for SENSEX
+    },
+    'NIFTYBANK': {
+        name: 'NIFTY Bank Index',
+        data: generateStockData(48000, 47900, 30) // Higher base price for Bank Nifty
+    },
+    'NIFTY100': {
+        name: 'NIFTY 100 Index',
+        data: generateStockData(23000, 22950, 30) // Higher base price for NIFTY 100
+    },
+    'LIC': {
+    name: 'Life Insurance Corporation of India',
+    data: generateStockData(650, 645, 30)
+},
+'BAJFINANCE': {
+    name: 'Bajaj Finance Ltd.',
+    data: generateStockData(7000, 6980, 30)
+},
+'BAJAJ-AUTO': {
+    name: 'Bajaj Auto Ltd.',
+    data: generateStockData(8000, 7980, 30)
+},
+'TVSMOTOR': {
+    name: 'TVS Motor Company Ltd.',
+    data: generateStockData(1800, 1790, 30)
+},
+'M&M': {
+    name: 'Mahindra & Mahindra Ltd.',
+    data: generateStockData(1800, 1795, 30)
+},
+'HCLTECH': {
+    name: 'HCL Technologies Ltd.',
+    data: generateStockData(1400, 1395, 30)
+},
+'WIPRO': {
+    name: 'Wipro Ltd.',
+    data: generateStockData(470, 465, 30)
+},
+'ADANIENT': {
+    name: 'Adani Enterprises Ltd.',
+    data: generateStockData(3000, 2985, 30)
+},
+'ADANIPORTS': {
+    name: 'Adani Ports and SEZ Ltd.',
+    data: generateStockData(1150, 1145, 30)
+},
+'MARUTI': {
+    name: 'Maruti Suzuki India Ltd.',
+    data: generateStockData(11500, 11480, 30)
+},
+'TITAN': {
+    name: 'Titan Company Ltd.',
+    data: generateStockData(3200, 3185, 30)
+},
+'ASIANPAINT': {
+    name: 'Asian Paints Ltd.',
+    data: generateStockData(2900, 2885, 30)
+},
+'AXISBANK': {
+    name: 'Axis Bank Ltd.',
+    data: generateStockData(1050, 1040, 30)
+},
+'PNB': {
+    name: 'Punjab National Bank',
+    data: generateStockData(90, 88, 30)
+},
+'CANBK': {
+    name: 'Canara Bank',
+    data: generateStockData(370, 368, 30)
+},
+'BOB': {
+    name: 'Bank of Baroda',
+    data: generateStockData(260, 258, 30)
+},
+'FEDERALBNK': {
+    name: 'Federal Bank Ltd.',
+    data: generateStockData(150, 148, 30)
+},
+'INDUSINDBK': {
+    name: 'IndusInd Bank Ltd.',
+    data: generateStockData(1400, 1390, 30)
+},
+'IDFCFIRSTB': {
+    name: 'IDFC First Bank Ltd.',
+    data: generateStockData(85, 83, 30)
+},
+'POWERGRID': {
+    name: 'Power Grid Corporation of India Ltd.',
+    data: generateStockData(270, 268, 30)
+},
+'NTPC': {
+    name: 'NTPC Ltd.',
+    data: generateStockData(350, 348, 30)
+},
+'ONGC': {
+    name: 'Oil and Natural Gas Corporation Ltd.',
+    data: generateStockData(190, 188, 30)
+},
+'COALINDIA': {
+    name: 'Coal India Ltd.',
+    data: generateStockData(340, 338, 30)
+},
+'BPCL': {
+    name: 'Bharat Petroleum Corporation Ltd.',
+    data: generateStockData(420, 418, 30)
+},
+'IOC': {
+    name: 'Indian Oil Corporation Ltd.',
+    data: generateStockData(125, 123, 30)
+},
+'RELIANCE_POWER': {
+    name: 'Reliance Power Ltd.',
+    data: generateStockData(25, 24.5, 30)
+},
+'TATASTEEL': {
+    name: 'Tata Steel Ltd.',
+    data: generateStockData(150, 148, 30)
+},
+'JSWSTEEL': {
+    name: 'JSW Steel Ltd.',
+    data: generateStockData(850, 845, 30)
+},
+'SAIL': {
+    name: 'Steel Authority of India Ltd.',
+    data: generateStockData(95, 93, 30)
+},
+'HINDALCO': {
+    name: 'Hindalco Industries Ltd.',
+    data: generateStockData(500, 495, 30)
+},
+'VEDL': {
+    name: 'Vedanta Ltd.',
+    data: generateStockData(290, 288, 30)
+},
+'TATAMOTORS': {
+    name: 'Tata Motors Ltd.',
+    data: generateStockData(950, 940, 30)
+},
+'ASHOKLEY': {
+    name: 'Ashok Leyland Ltd.',
+    data: generateStockData(180, 178, 30)
+},
+'ESCORTS': {
+    name: 'Escorts Kubota Ltd.',
+    data: generateStockData(3400, 3385, 30)
+},
+'BEL': {
+    name: 'Bharat Electronics Ltd.',
+    data: generateStockData(170, 168, 30)
+},
+'BHEL': {
+    name: 'Bharat Heavy Electricals Ltd.',
+    data: generateStockData(130, 128, 30)
+},
+'IRCTC': {
+    name: 'Indian Railway Catering & Tourism Corporation',
+    data: generateStockData(920, 915, 30)
+},
+'IRFC': {
+    name: 'Indian Railway Finance Corporation Ltd.',
+    data: generateStockData(90, 89, 30)
+},
+'CONCOR': {
+    name: 'Container Corporation of India Ltd.',
+    data: generateStockData(800, 790, 30)
+},
+'LT': {
+    name: 'Larsen & Toubro Ltd.',
+    data: generateStockData(3700, 3680, 30)
+},
+'TCS': {
+    name: 'Tata Consultancy Services Ltd.',
+    data: generateStockData(3700, 3680, 30)
+},
+'TECHM': {
+    name: 'Tech Mahindra Ltd.',
+    data: generateStockData(1300, 1290, 30)
+},
+'MINDTREE': {
+    name: 'LTIMindtree Ltd.',
+    data: generateStockData(5200, 5180, 30)
+},
+'INFY': {
+    name: 'Infosys Ltd.',
+    data: generateStockData(1550, 1545, 30)
+},
+'NESTLEIND': {
+    name: 'Nestle India Ltd.',
+    data: generateStockData(24500, 24400, 30)
+},
+'DABUR': {
+    name: 'Dabur India Ltd.',
+    data: generateStockData(540, 535, 30)
+},
+'BRITANNIA': {
+    name: 'Britannia Industries Ltd.',
+    data: generateStockData(5200, 5185, 30)
+},
+'COLPAL': {
+    name: 'Colgate-Palmolive (India) Ltd.',
+    data: generateStockData(1800, 1795, 30)
+},
+'GODREJCP': {
+    name: 'Godrej Consumer Products Ltd.',
+    data: generateStockData(1200, 1195, 30)
+},
+'MARICO': {
+    name: 'Marico Ltd.',
+    data: generateStockData(550, 545, 30)
+},
+'PAGEIND': {
+    name: 'Page Industries Ltd.',
+    data: generateStockData(36000, 35800, 30)
+},
+'DIVISLAB': {
+    name: 'Divi’s Laboratories Ltd.',
+    data: generateStockData(4100, 4080, 30)
+},
+'AUROPHARMA': {
+    name: 'Aurobindo Pharma Ltd.',
+    data: generateStockData(920, 915, 30)
+},
+'DRREDDY': {
+    name: 'Dr. Reddy’s Laboratories Ltd.',
+    data: generateStockData(6200, 6180, 30)
+},
+'CIPLA': {
+    name: 'Cipla Ltd.',
+    data: generateStockData(1200, 1190, 30)
+},
+'SUNPHARMA': {
+    name: 'Sun Pharmaceutical Industries Ltd.',
+    data: generateStockData(1450, 1440, 30)
+},
+'HDFCLIFE': {
+    name: 'HDFC Life Insurance Company Ltd.',
+    data: generateStockData(610, 608, 30)
+},
+'ICICIPRULI': {
+    name: 'ICICI Prudential Life Insurance Co Ltd.',
+    data: generateStockData(540, 538, 30)
+},
+'SBILIFE': {
+    name: 'SBI Life Insurance Co Ltd.',
+    data: generateStockData(1300, 1295, 30)
+},
+'NAUKRI': {
+    name: 'Info Edge (India) Ltd.',
+    data: generateStockData(4700, 4680, 30)
+},
+'ZOMATO': {
+    name: 'Zomato Ltd.',
+    data: generateStockData(140, 138, 30)
+},
+'PAYTM': {
+    name: 'One97 Communications Ltd.',
+    data: generateStockData(480, 475, 30)
+}
+
+
+    };
+    
+    // Search button click event
+    searchBtn.addEventListener('click', searchStock);
+    
+    // Enter key press event
+    stockSearch.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchStock();
+        }
+    });
+    
+    // Search stock function
+    function searchStock() {
+        const symbol = stockSearch.value.trim().toUpperCase();
+        
+        if (!symbol) {
+            alert('Please enter a stock symbol');
+            return;
+        }
+        
+        // Show loading
+        loading.style.display = 'block';
+        content.style.display = 'none';
+        error.style.display = 'none';
+        
+        // Simulate API call delay
+        setTimeout(() => {
+            if (stocksData[symbol]) {
+                displayStockData(symbol, stocksData[symbol]);
+            } else {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+            }
+        }, 1500);
+    }
+    
+    // Display stock data
+    function displayStockData(symbol, stockData) {
+        // Update stock info
+        stockName.textContent = `${stockData.name} (${symbol})`;
+        
+        const latestData = stockData.data[stockData.data.length - 1];
+        
+        nsePrice.textContent = `₹${latestData.nsePrice.toFixed(2)}`;
+        bsePrice.textContent = `₹${latestData.bsePrice.toFixed(2)}`;
+        
+        const nseChangeValue = latestData.nsePrice - stockData.data[stockData.data.length - 2].nsePrice;
+        const nseChangePercent = (nseChangeValue / stockData.data[stockData.data.length - 2].nsePrice) * 100;
+        
+        const bseChangeValue = latestData.bsePrice - stockData.data[stockData.data.length - 2].bsePrice;
+        const bseChangePercent = (bseChangeValue / stockData.data[stockData.data.length - 2].bsePrice) * 100;
+        
+        nseChange.textContent = `${nseChangeValue.toFixed(2)} (${nseChangePercent.toFixed(2)}%)`;
+        nseChange.style.color = nseChangeValue >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+        
+        bseChange.textContent = `${bseChangeValue.toFixed(2)} (${bseChangePercent.toFixed(2)}%)`;
+        bseChange.style.color = bseChangeValue >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+        
+        // Calculate price difference
+        const priceDifference = latestData.nsePrice - latestData.bsePrice;
+        const priceDiffPercent = (priceDifference / latestData.bsePrice) * 100;
+        
+        priceDiff.textContent = `₹${Math.abs(priceDifference).toFixed(2)} (${Math.abs(priceDiffPercent).toFixed(2)}%)`;
+        
+        // Generate recommendation
+        if (Math.abs(priceDiffPercent) < 0.1) {
+            recommendation.textContent = 'No significant price difference between exchanges';
+            recommendation.style.backgroundColor = '#e2e8f0';
+            recommendation.style.color = '#1e293b';
+        } else if (priceDifference > 0) {
+            recommendation.textContent = 'Consider buying on BSE (lower price)';
+            recommendation.style.backgroundColor = '#10b981';
+            recommendation.style.color = 'white';
+        } else {
+            recommendation.textContent = 'Consider buying on NSE (lower price)';
+            recommendation.style.backgroundColor = '#10b981';
+            recommendation.style.color = 'white';
+        }
+        
+        // Create charts
+        createPriceChart(stockData.data);
+        createDiffChart(stockData.data);
+        
+        // Generate AI analysis
+        generateAnalysis(symbol, stockData);
+        
+        // Show content
+        loading.style.display = 'none';
+        content.style.display = 'block';
+    }
+    
+  // Create price comparison chart
+function createPriceChart(data) {
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (priceChart) {
+        priceChart.destroy();
+    }
+    
+    const labels = data.map(item => item.date);
+    const nsePrices = data.map(item => item.nsePrice);
+    const bsePrices = data.map(item => item.bsePrice);
+    
+    priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'NSE Price',
+                    data: nsePrices,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    tension: 0.1,
+                    pointRadius: 2,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: 'BSE Price',
+                    data: bsePrices,
+                    borderColor: '#60a5fa',
+                    backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                    tension: 0.1,
+                    pointRadius: 2,
+                    pointHoverRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: 'white' // White legend text
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    titleColor: 'white', // White tooltip title
+                    bodyColor: 'white', // White tooltip text
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Dark tooltip background
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ₹' + context.raw.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: 'white' // White x-axis labels
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)' // Light grid lines
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: 'white', // White y-axis labels
+                        callback: function(value) {
+                            return '₹' + value;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)' // Light grid lines
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Create price difference chart
+function createDiffChart(data) {
+    const ctx = document.getElementById('diffChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (diffChart) {
+        diffChart.destroy();
+    }
+    
+    const labels = data.map(item => item.date);
+    const priceDiffs = data.map(item => item.nsePrice - item.bsePrice);
+    
+    diffChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'NSE-BSE Price Difference',
+                    data: priceDiffs,
+                    backgroundColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)';
+                    },
+                    borderColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value >= 0 ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)';
+                    },
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: 'white' // White legend text
+                    }
+                },
+                tooltip: {
+                    titleColor: 'white', // White tooltip title
+                    bodyColor: 'white', // White tooltip text
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Dark tooltip background
+                    callbacks: {
+                        label: function(context) {
+                            return 'Difference: ₹' + context.raw.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: 'white' // White x-axis labels
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)' // Light grid lines
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: 'white', // White y-axis labels
+                        callback: function(value) {
+                            return '₹' + value;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)' // Light grid lines
+                    }
+                }
+            }
+        }
+    });
+}
+    
+    // Generate AI analysis using OpenRouter DeepSeek R1 API
+    async function generateAnalysis(symbol, stockData) {
+        // Show loading
+        analysisLoading.style.display = 'block';
+        analysisReport.innerHTML = '';
+        
+        try {
+            // Prepare data for the AI
+            const latestData = stockData.data[stockData.data.length - 1];
+            const priceDifference = latestData.nsePrice - latestData.bsePrice;
+            const priceDiffPercent = (priceDifference / latestData.bsePrice) * 100;
+            
+            // Calculate some basic statistics
+            const nsePrices = stockData.data.map(item => item.nsePrice);
+            const bsePrices = stockData.data.map(item => item.bsePrice);
+            const nseMean = nsePrices.reduce((a, b) => a + b, 0) / nsePrices.length;
+            const bseMean = bsePrices.reduce((a, b) => a + b, 0) / bsePrices.length;
+            const nseVolatility = calculateVolatility(nsePrices);
+            const bseVolatility = calculateVolatility(bsePrices);
+            
+            // Prepare prompt for the AI
+            const prompt = `
+                You are a financial analyst specializing in Indian stock markets. Analyze the following data for ${stockData.name} (${symbol}):
+                
+                Current NSE Price: ₹${latestData.nsePrice.toFixed(2)}
+                Current BSE Price: ₹${latestData.bsePrice.toFixed(2)}
+                Price Difference: ₹${Math.abs(priceDifference).toFixed(2)} (${Math.abs(priceDiffPercent).toFixed(2)}%)
+                NSE 30-day Average: ₹${nseMean.toFixed(2)}
+                BSE 30-day Average: ₹${bseMean.toFixed(2)}
+                NSE Volatility: ${nseVolatility.toFixed(4)}
+                BSE Volatility: ${bseVolatility.toFixed(4)}
+                
+                Provide a concise analysis with the following sections:
+                1. Market Overview: Brief overview of the stock's performance
+                2. Exchange Comparison: Analysis of price differences between NSE and BSE
+                3. Recommendation: Where should investors consider buying this stock and why
+                4. Risk Assessment: Brief mention of potential risks
+                
+                Keep your response under 400 words and format it in HTML with h4 tags for section headers.
+            `;
+            
+            // Call OpenRouter API with DeepSeek R1 model
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                    'HTTP-Referer': window.location.href,
+                    'X-Title': 'India Stock Price Comparison'
+                },
+                body: JSON.stringify({
+                    model: 'deepseek/deepseek-coder-v2',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                analysisReport.innerHTML = data.choices[0].message.content;
+            } else {
+                // Fallback if API fails
+                analysisReport.innerHTML = generateFallbackAnalysis(symbol, stockData);
+            }
+        } catch (error) {
+            console.error('Error generating analysis:', error);
+            // Fallback if API fails
+            analysisReport.innerHTML = generateFallbackAnalysis(symbol, stockData);
+        } finally {
+            // Hide loading
+            analysisLoading.style.display = 'none';
+        }
+    }
+    
+    // Generate fallback analysis if API fails
+    function generateFallbackAnalysis(symbol, stockData) {
+        const latestData = stockData.data[stockData.data.length - 1];
+        const priceDifference = latestData.nsePrice - latestData.bsePrice;
+        const priceDiffPercent = (priceDifference / latestData.bsePrice) * 100;
+        
+        let exchangeRecommendation = '';
+        if (Math.abs(priceDiffPercent) < 0.1) {
+            exchangeRecommendation = 'Both exchanges offer similar prices, so investors can choose based on other factors like transaction costs or convenience.';
+        } else if (priceDifference > 0) {
+            exchangeRecommendation = 'BSE currently offers a lower price, which may be advantageous for buyers looking to optimize entry points.';
+        } else {
+            exchangeRecommendation = 'NSE currently offers a lower price, which may be advantageous for buyers looking to optimize entry points.';
+        }
+        
+        return `
+            <h4>Market Overview</h4>
+            <p>${stockData.name} (${symbol}) is currently trading at ₹${latestData.nsePrice.toFixed(2)} on NSE and ₹${latestData.bsePrice.toFixed(2)} on BSE. The stock has shown moderate volatility over the past month, with price movements reflecting broader market trends.</p>
+            
+            <h4>Exchange Comparison</h4>
+            <p>There is a price difference of ₹${Math.abs(priceDifference).toFixed(2)} (${Math.abs(priceDiffPercent).toFixed(2)}%) between NSE and BSE. This difference is ${Math.abs(priceDiffPercent) > 0.5 ? 'significant' : 'relatively small'} and may present arbitrage opportunities for institutional investors.</p>
+            
+            <h4>Recommendation</h4>
+            <p>${exchangeRecommendation} However, investors should consider other factors beyond just price, including liquidity, trading volumes, and transaction costs.</p>
+            
+            <h4>Risk Assessment</h4>
+            <p>As with all equity investments, ${symbol} carries market risk and is subject to both company-specific factors and broader economic conditions. Investors should conduct thorough research and consider their risk tolerance before making investment decisions.</p>
+        `;
+    }
+    
+    // Helper function to calculate volatility
+    function calculateVolatility(prices) {
+        const mean = prices.reduce((a, b) => a + b, 0) / prices.length;
+        const squaredDiffs = prices.map(price => Math.pow(price - mean, 2));
+        const variance = squaredDiffs.reduce((a, b) => a + b, 0) / squaredDiffs.length;
+        return Math.sqrt(variance) / mean; // Coefficient of variation as a measure of volatility
+    }
+    
+    // Generate random stock data for demonstration
+    function generateStockData(baseNsePrice, baseBsePrice, days) {
+        const data = [];
+        const today = new Date();
+        
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            
+            // Generate random price movements with some correlation between NSE and BSE
+            const commonFactor = (Math.random() - 0.5) * 0.02; // Common market movement
+            const nseSpecific = (Math.random() - 0.5) * 0.01; // NSE-specific movement
+            const bseSpecific = (Math.random() - 0.5) * 0.01; // BSE-specific movement
+            
+            // Calculate new prices with some persistence
+            const prevNsePrice = i < days - 1 ? data[data.length - 1].nsePrice : baseNsePrice;
+            const prevBsePrice = i < days - 1 ? data[data.length - 1].bsePrice : baseBsePrice;
+            
+            const nsePrice = prevNsePrice * (1 + commonFactor + nseSpecific);
+            const bsePrice = prevBsePrice * (1 + commonFactor + bseSpecific);
+            
+            data.push({
+                date: formatDate(date),
+                nsePrice: nsePrice,
+                bsePrice: bsePrice
+            });
+        }
+        
+        return data;
+    }
+    
+    // Format date as DD MMM
+    function formatDate(date) {
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        return `${day} ${month}`;
+    }
+    
+    // Initialize with a default stock (optional)
+    // Uncomment the following line to load a default stock on page load
+    // setTimeout(() => { stockSearch.value = 'RELIANCE'; searchBtn.click(); }, 1000);
+});
+    </script>
+</body>
+</html>
+{% endblock %}

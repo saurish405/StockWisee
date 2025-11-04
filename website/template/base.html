@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}StockWise{% endblock %}</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary-color: #4e73df;
+      --secondary-color: #f8f9fc;
+      --accent-color: #2e59d9;
+      --glass-bg: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-top: 70px;
+      background-color: #f8f9fa;
+    }
+
+    body:not(.auth-page) .background-image {
+    opacity: 1; /* Adjust this value (0.1 to 1) for desired opacity */
+    filter: brightness(0.7);
+}
+
+/* For auth pages (login/signup) - keep full opacity */
+body.auth-page .background-image {
+    opacity: 1;
+    filter: brightness(0.7);
+}
+
+    /* Glass Morphism Effects */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(31, 38, 135, 0.3);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* Background Image Container */
+    .background-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .background-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 1;
+      filter: brightness(0.7);
+    }
+
+    /* Auth Page Styles */
+
+    .navbar.auth-page-navbar {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.navbar.auth-page-navbar .nav-link {
+  color: white !important;
+}
+
+.navbar.auth-page-navbar .navbar-brand {
+  color: white !important;
+}
+    .auth-page {
+      background: none !important;
+    }
+
+    .auth-page .navbar .nav-link,
+    .auth-page .navbar-brand {
+      background-color: transparent;
+    }
+
+    .navbar.auth-navbar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.navbar.auth-navbar .nav-link {
+  color: white !important;
+}
+
+.navbar.auth-navbar .navbar-brand {
+  color: white !important;
+}
+
+
+    .auth-page .form-control {
+      background-color: transparent;
+      color: white;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .auth-page .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    .auth-page .form-control:focus {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      padding: 10px 0;
+    }
+
+    .navbar-brand {
+      color: var(--primary-color) !important;
+      font-weight: 600;
+    }
+
+    .navbar .nav-link {
+      color: rgba(0, 0, 0, 0.8) !important;
+      font-weight: 500;
+      padding: 8px 15px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .navbar .nav-link:hover {
+      color: var(--primary-color) !important;
+      transform: translateY(-2px);
+    }
+
+    /* Badges */
+    .badge {
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+
+    .bg-success {
+      background-color: rgba(40, 167, 69, 0.9) !important;
+    }
+
+    .bg-danger {
+      background-color: rgba(220, 53, 69, 0.9) !important;
+    }
+
+    /* Chat Bubble Styles */
+    .chat-bubble {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+    }
+
+    .chat-bubble:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .chat-box {
+      position: fixed;
+      bottom: 90px;
+      right: 30px;
+      width: 350px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-messages {
+      height: 300px;
+      padding: 15px;
+      overflow-y: auto;
+      background: #f8f9fc;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 80%;
+    }
+
+    .user {
+      background: #e9ecef;
+      color: #212529;
+      margin-left: auto;
+      border-bottom-right-radius: 2px !important;
+    }
+
+    .bot {
+      background: rgba(78, 115, 223, 0.1);
+      color: var(--primary-color);
+      margin-right: auto;
+      border-bottom-left-radius: 2px !important;
+    }
+
+    #chat-form {
+      display: flex;
+      border-top: 1px solid #dee2e6;
+    }
+
+    #chat-input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      outline: none;
+    }
+
+    #chat-form button {
+      padding: 12px 15px;
+      border: none;
+      background: var(--primary-color);
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.background-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+  filter: brightness(0.7);
+  transition: opacity 0.5s ease-in-out;
+}
+  </style>
+  {% block extra_styles %}{% endblock %}
+</head>
+<body class="{% if request.endpoint in ['auth.login', 'auth.sign_up'] %}auth-page{% endif %}">
+  <!-- Background Images -->
+  <!-- Background Images -->
+<div class="background-container animate__animated animate__fadeIn">
+  {% if request.endpoint in ['auth.login', 'auth.sign_up'] %}
+    <img src="{{ url_for('static', filename='images/image.jpg') }}" class="background-image" alt="Auth Background">
+  {% elif request.endpoint == 'main.home' %}
+    <img src="{{ url_for('static', filename='images/img.jpg') }}" class="background-image" alt="Home Background">
+  {% elif request.endpoint == 'main.compare_markets' %}
+    <img src="{{ url_for('static', filename='images/img.jpg') }}" class="background-image" alt="Compare Background">
+  {% else %}
+    <img src="{{ url_for('static', filename='images/img.jpg') }}" class="background-image" alt="Default Background">
+  {% endif %}
+</div>
+  
+ <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top {% if request.endpoint in ['auth.login', 'auth.sign_up', 'views.intro'] %}auth-page-navbar{% endif %}">
+  <div class="container">
+    <a class="navbar-brand animate__animated animate__fadeInLeft" href="{{ url_for('views.intro') }}">
+      <i class="fas fa-chart-line me-2"></i>StockWise
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        {% if current_user.is_authenticated %}
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.home') }}"><i class="fas fa-home me-1"></i> Dashboard</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.user_details') }}"><i class="fas fa-user me-1"></i> Account</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.compare_markets') }}"><i class="fas fa-balance-scale me-1"></i> Compare</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('views.intro') }}"><i class="fas fa-home me-1"></i> Home</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+        </li>
+        <li class="nav-item animate__animated animate__fadeInDown">
+          <a class="nav-link" href="{{ url_for('auth.sign_up') }}"><i class="fas fa-user-plus me-1"></i> Sign Up</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Flash Messages -->
+<div class="container mt-3">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show animate__animated animate__fadeInRight">
+        <div class="d-flex align-items-center">
+          <i class="fas {{ 'fa-times-circle' if category == 'error' else 'fa-check-circle' }} me-2"></i>
+          <div>{{ message }}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+  <!-- Main Content -->
+  <main class="container my-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if current_user.is_authenticated %}
+  <!-- Chat Bubble -->
+  <div id="chat-bubble" class="chat-bubble">
+    <i class="fas fa-comment-dots me-2"></i>Ask Mr. Market
+  </div>
+
+  <!-- Chat Box -->
+  <div id="chat-box" class="chat-box" style="display: none;">
+    <div class="chat-header">
+      <strong><i class="fas fa-robot me-2"></i>Mr. Market</strong>
+      <button id="close-chat" class="btn btn-sm btn-link text-white"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <form id="chat-form">
+      <input type="text" id="chat-input" placeholder="Ask about Indian stocks..." autocomplete="off" />
+      <button type="submit"><i class="fas fa-paper-plane"></i></button>
+    </form>
+  </div>
+{% endif %}
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Chat functionality
+    document.getElementById('chat-bubble').onclick = () => {
+      document.getElementById('chat-box').style.display = 'flex';
+    };
+    
+    document.getElementById('close-chat').onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('chat-box').style.display = 'none';
+    };
+    
+    document.getElementById('chat-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const message = input.value.trim();
+      if (!message) return;
+  
+      appendMessage('You', message, 'user');
+      input.value = '';
+  
+      appendMessage('Mr. Market', 'Typing...', 'bot');
+  
+      try {
+        const res = await fetch('/mr-market', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+  
+        const data = await res.json();
+        const responses = document.querySelectorAll('.bot');
+        responses[responses.length - 1].innerText = data.reply;
+      } catch (err) {
+        console.error(err);
+        const responses = document.querySelectorAll('.bot');
+        responses[responses.length - 1].innerText = 'Oops! Something went wrong.';
+      }
+    };
+    
+    function appendMessage(name, text, className) {
+      const msgContainer = document.getElementById('chat-messages');
+      const msg = document.createElement('div');
+      msg.className = `message ${className}`;
+      msg.innerHTML = `<strong>${name}:</strong> ${text}`;
+      msgContainer.appendChild(msg);
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    // Navbar hide on scroll
+    let lastScroll = 0;
+    window.addEventListener('scroll', function() {
+      const currentScroll = window.pageYOffset;
+      const navbar = document.querySelector('.navbar');
+      
+      if (currentScroll <= 100) {
+        navbar.classList.remove('hide');
+        return;
+      }
+      
+      if (currentScroll > lastScroll) {
+        // Scrolling down
+        navbar.classList.add('hide');
+      } else {
+        // Scrolling up
+        navbar.classList.remove('hide');
+      }
+      lastScroll = currentScroll;
+    });
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

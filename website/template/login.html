@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center vh-100 align-items-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <div class="text-center mb-4">
+                <h2 class="text-white fw-bold">Welcome Back</h2>
+                <p class="text-white-50 mb-0">Login to your account</p>
+            </div>
+            
+            <form method="POST" class="needs-validation" novalidate>
+                <div class="mb-3 fade-in" style="animation-delay: 0.2s;">
+                    <label for="email" class="form-label text-white">Email Address</label>
+                    <input type="email" class="form-control bg-transparent text-white" id="email" name="email" 
+                           placeholder="Enter your email" required style="border-color: rgba(255,255,255,0.3);">
+                    <div class="invalid-feedback text-white">
+                        Please provide a valid email.
+                    </div>
+                </div>
+                
+                <div class="mb-4 fade-in" style="animation-delay: 0.4s;">
+                    <label for="password" class="form-label text-white">Password</label>
+                    <input type="password" class="form-control bg-transparent text-white" id="password" name="password" 
+                           placeholder="Enter your password" required style="border-color: rgba(255,255,255,0.3);">
+                    <div class="invalid-feedback text-white">
+                        Please provide a password.
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 fade-in" style="animation-delay: 0.6s;">
+                    <button type="submit" class="btn btn-glass btn-lg fw-bold">Login</button>
+                </div>
+                
+                <div class="text-center mt-3 fade-in" style="animation-delay: 0.8s;">
+                    <p class="text-white mb-2">Don't have an account? 
+                        <a href="{{ url_for('auth.sign_up') }}" class="text-white fw-bold">Sign up</a>
+                    </p>
+                    <a href="#" class="text-white-50 small">Forgot password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Additional login-specific styles */
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.6) !important;
+    }
+    
+    .form-control:focus {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+        border-color: rgba(255,255,255,0.5) !important;
+        box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+    }
+    
+    .invalid-feedback {
+        background: rgba(255, 99, 71, 0.2);
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}

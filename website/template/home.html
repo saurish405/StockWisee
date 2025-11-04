@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Market Dashboard{% endblock %}
+
+{% block extra_styles %}
+<style>
+  /* Market Cards Styling */
+  .market-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 1rem;
+  }
+  
+  .full-height-card {
+    height: 180px; /* Original height */
+  }
+  
+  .half-height-card {
+    height: 90px; /* Half of original height */
+  }
+  
+  .market-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+  }
+  
+  .market-card .card-body {
+    padding: 1rem;
+  }
+  
+  .market-card .card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .market-card .card-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .half-height-card .card-text {
+    font-size: 1.2rem;
+  }
+
+  /* Custom Card Colors */
+  .nifty50-card {
+    background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%) !important;
+    color: white !important;
+  }
+
+  .banknifty-card {
+    background: linear-gradient(135deg, #c31432 0%, #240b36 100%) !important;
+    color: white !important;
+  }
+
+  .niftyit-card {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    color: white !important;
+  }
+
+  .market-status-card {
+    background: linear-gradient(135deg, #8E54E9 0%, #4776E6 100%) !important;
+    color: white !important;
+  }
+
+  /* Top Performers Section */
+  .top-performers-title {
+    color: white;
+    margin: 2rem 0 1rem;
+    font-size: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 0.5rem;
+  }
+
+  /* News Section Styling */
+.news-card {
+  border: none;
+  border-radius: 15px; /* Curved corners for the whole card */
+  overflow: hidden; /* Ensures child elements don't spill outside */
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.news-card .card-header {
+  background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
+  padding: 1rem 1.5rem;
+  /* No need for border-radius here since parent has overflow:hidden */
+}
+
+.news-item {
+  padding: 1rem 1.5rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Remove individual rounded corners */
+  margin: 0; /* Remove margin to ensure seamless look */
+}
+
+.news-item:hover {
+  background-color: rgba(0, 0, 0, 0.45);
+  border-left: 3px solid var(--primary-color);
+  transform: translateX(5px);
+}
+
+.news-item a {
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.news-item:hover a {
+  color: var(--primary-color);
+}
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .market-card .card-text {
+      font-size: 1.5rem;
+    }
+    
+    .news-item {
+      padding: 0.8rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+  <!-- Main Market Cards -->
+  <div class="row g-4 mb-2">
+    <!-- NIFTY 50 -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card nifty50-card animate__animated animate__fadeInUp full-height-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">NIFTY 50</h5>
+            <i class="fas fa-chart-line fa-lg opacity-75"></i>
+          </div>
+          {% if market_data.NIFTY_50 %}
+          <h2 class="card-text">
+            {{ market_data.NIFTY_50['data'][0]['lastPrice'] }}
+            <span class="badge bg-{{ 'success' if market_data.NIFTY_50['data'][0]['pChange'] > 0 else 'danger' }} float-end">
+              <i class="fas fa-arrow-{{ 'up' if market_data.NIFTY_50['data'][0]['pChange'] > 0 else 'down' }} me-1"></i>
+              {{ market_data.NIFTY_50['data'][0]['pChange'] }}%
+            </span>
+          </h2>
+          <p class="card-text mb-0"><small>Volume: {{ market_data.NIFTY_50['data'][0]['quantityTraded'] }}</small></p>
+          {% else %}
+          <h2 class="card-text">-- <span class="badge bg-secondary float-end">--%</span></h2>
+          <p class="card-text mb-0"><small>Data unavailable</small></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- BANK NIFTY -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card banknifty-card animate__animated animate__fadeInUp full-height-card" style="animation-delay: 0.1s">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">BANK NIFTY</h5>
+            <i class="fas fa-university fa-lg opacity-75"></i>
+          </div>
+          {% if market_data.BANK_NIFTY %}
+          <h2 class="card-text">
+            {{ market_data.BANK_NIFTY['data'][0]['lastPrice'] }}
+            <span class="badge bg-{{ 'success' if market_data.BANK_NIFTY['data'][0]['pChange'] > 0 else 'danger' }} float-end">
+              <i class="fas fa-arrow-{{ 'up' if market_data.BANK_NIFTY['data'][0]['pChange'] > 0 else 'down' }} me-1"></i>
+              {{ market_data.BANK_NIFTY['data'][0]['pChange'] }}%
+            </span>
+          </h2>
+          <p class="card-text mb-0"><small>Volume: {{ market_data.BANK_NIFTY['data'][0]['quantityTraded'] }}</small></p>
+          {% else %}
+          <h2 class="card-text">-- <span class="badge bg-secondary float-end">--%</span></h2>
+          <p class="card-text mb-0"><small>Data unavailable</small></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- NIFTY IT -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card niftyit-card animate__animated animate__fadeInUp full-height-card" style="animation-delay: 0.2s">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">NIFTY IT</h5>
+            <i class="fas fa-laptop-code fa-lg opacity-75"></i>
+          </div>
+          {% if market_data.NIFTY_IT %}
+          <h2 class="card-text">
+            {{ market_data.NIFTY_IT['data'][0]['lastPrice'] }}
+            <span class="badge bg-{{ 'success' if market_data.NIFTY_IT['data'][0]['pChange'] > 0 else 'danger' }} float-end">
+              <i class="fas fa-arrow-{{ 'up' if market_data.NIFTY_IT['data'][0]['pChange'] > 0 else 'down' }} me-1"></i>
+              {{ market_data.NIFTY_IT['data'][0]['pChange'] }}%
+            </span>
+          </h2>
+          <p class="card-text mb-0"><small>Volume: {{ market_data.NIFTY_IT['data'][0]['quantityTraded'] }}</small></p>
+          {% else %}
+          <h2 class="card-text">-- <span class="badge bg-secondary float-end">--%</span></h2>
+          <p class="card-text mb-0"><small>Data unavailable</small></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Market Status -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card market-status-card animate__animated animate__fadeInUp full-height-card" style="animation-delay: 0.3s">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">Market Status</h5>
+            <i class="fas fa-chart-pie fa-lg opacity-75"></i>
+          </div>
+          <h2 class="card-text">Live</h2>
+          <p class="card-text mb-0"><small>Updated: {{ last_updated }}</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Performers Section -->
+  <h3 class="top-performers-title">Today's Top Performers</h3>
+  
+  <div class="row g-4 mb-4">
+    <!-- Top Performer 1 -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card nifty50-card half-height-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">RELIANCE</h5>
+            <span class="badge bg-success">
+              <i class="fas fa-arrow-up me-1"></i>
+              2.5%
+            </span>
+          </div>
+          <h2 class="card-text">₹2,850.75</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Performer 2 -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card banknifty-card half-height-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">HDFC BANK</h5>
+            <span class="badge bg-success">
+              <i class="fas fa-arrow-up me-1"></i>
+              1.8%
+            </span>
+          </div>
+          <h2 class="card-text">₹1,650.30</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Performer 3 -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card niftyit-card half-height-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">TCS</h5>
+            <span class="badge bg-success">
+              <i class="fas fa-arrow-up me-1"></i>
+              3.2%
+            </span>
+          </div>
+          <h2 class="card-text">₹3,780.50</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Performer 4 -->
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="market-card market-status-card half-height-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">INFOSYS</h5>
+            <span class="badge bg-success">
+              <i class="fas fa-arrow-up me-1"></i>
+              2.1%
+            </span>
+          </div>
+          <h2 class="card-text">₹1,520.40</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- News Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="news-card animate__animated animate__fadeIn">
+        <div class="card-header text-white">
+          <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i>Market News</h5>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for article in news_articles %}
+          <div class="news-item">
+            <a href="{{ article.url }}" target="_blank" class="d-flex justify-content-between align-items-start">
+              <div class="me-3">
+                <strong>{{ article.title }}</strong>
+                <div class="mt-1">
+                  <small class="text-muted">{{ article.source.name }} • {{ article.publishedAt[:10] }}</small>
+                </div>
+              </div>
+              <i class="fas fa-external-link-alt text-muted"></i>
+            </a>
+          </div>
+          {% endfor %}
+          {% if news_articles|length == 0 %}
+          <div class="text-center py-4">
+            <i class="fas fa-newspaper fa-2x text-muted mb-2"></i>
+            <p class="text-muted mb-0">No news available at the moment</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+<div class="text-center mt-5 text-muted">
+  <small>Data provided by NSE/BSE | Analysis by <strong>Saurish and Arka</strong></small>
+</div>

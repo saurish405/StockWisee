@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center vh-100 align-items-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 animate__animated animate__fadeInUp">
+            <div class="text-center mb-4">
+                <h2 class="text-white fw-bold">Create Account</h2>
+                <p class="text-white-50 mb-0">Join us today</p>
+            </div>
+            
+            <form method="POST" class="needs-validation" novalidate>
+                <div class="mb-3 fade-in" style="animation-delay: 0.2s;">
+                    <label for="email" class="form-label text-white">Email Address</label>
+                    <input type="email" class="form-control bg-transparent text-white" id="email" name="email" 
+                           placeholder="Enter your email" required style="border-color: rgba(255,255,255,0.3);">
+                    <div class="invalid-feedback text-white">
+                        Please provide a valid email.
+                    </div>
+                </div>
+                
+                <div class="mb-3 fade-in" style="animation-delay: 0.3s;">
+                    <label for="firstName" class="form-label text-white">First Name</label>
+                    <input type="text" class="form-control bg-transparent text-white" id="firstName" name="firstName" 
+                           placeholder="Enter your name" required style="border-color: rgba(255,255,255,0.3);">
+                    <div class="invalid-feedback text-white">
+                        Please provide your name.
+                    </div>
+                </div>
+                
+                <div class="mb-3 fade-in" style="animation-delay: 0.4s;">
+                    <label for="password1" class="form-label text-white">Password</label>
+                    <input type="password" class="form-control bg-transparent text-white" id="password1" name="password1" 
+                           placeholder="Create password" required style="border-color: rgba(255,255,255,0.3);">
+                    <div class="invalid-feedback text-white">
+                        Password must be at least 7 characters.
+                    </div>
+                </div>
+                
+                <div class="mb-4 fade-in" style="animation-delay: 0.5s;">
+                    <label for="password2" class="form-label text-white">Confirm Password</label>
+                    <input type="password" class="form-control bg-transparent text-white" id="password2" name="password2" 
+                           placeholder="Confirm password" required style="border-color: rgba(255,255,255,0.3);">
+                    <div class="invalid-feedback text-white">
+                        Passwords must match.
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 fade-in" style="animation-delay: 0.6s;">
+                    <button type="submit" class="btn btn-glass btn-lg fw-bold">Sign Up</button>
+                </div>
+                
+                <div class="text-center mt-3 fade-in" style="animation-delay: 0.8s;">
+                    <p class="text-white mb-0">Already have an account? 
+                        <a href="{{ url_for('auth.login') }}" class="text-white fw-bold">Login</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Additional signup-specific styles matching login page */
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.6) !important;
+    }
+    
+    .form-control:focus {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+        border-color: rgba(255,255,255,0.5) !important;
+        box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+    }
+    
+    .invalid-feedback {
+        background: rgba(255, 99, 71, 0.2);
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+</style>
+
+<script>
+    document.body.classList.add('login-page');
+</script>
+{% endblock %}
